@@ -263,13 +263,27 @@
     startTimer();
 
     // وظيفة زر "لا تضغط هني" لإعادة الصفحة وإظهار الرسالة
-    function triggerWarning() {
-      clearInterval(countdown);
-      const msg = document.getElementById('warningMsg');
-      msg.style.display = 'block';
-      setTimeout(() => {
-        startTimer();
-      }, 1200);
+function nextPage(pageNum) {
+      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+      const target = pageNum === 'error' ? document.getElementById('pageError') : document.getElementById('page' + pageNum);
+      target.classList.add('active');
+
+      const yt = document.getElementById('youtubeVideo');
+      if (pageNum === 5) {
+        // يتم تحميل الفيديو فقط عند الوصول لصفحته وبدون تشغيل تلقائي إجباري
+        if (!yt.getAttribute('src')) {
+          yt.src = yt.getAttribute('data-src');
+        }
+      } else {
+        // إيقاف الأغنية وتفريغ الرابط عند الخروج من صفحتها
+        yt.src = '';
+      }
+
+      if (pageNum === 1) {
+        startContinuousConfetti();
+      } else {
+        stopContinuousConfetti();
+      }
     }
 
     // Continuous Confetti for Page 1
