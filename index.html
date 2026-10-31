@@ -1,1 +1,374 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Happy Birthday! 🎂</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;800&family=Great+Vibes&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Cairo', sans-serif; user-select: none; }
+    body { background: #0f0c1b; color: #fff; overflow-x: hidden; height: 100vh; position: relative; }
+    
+    .page { display: none; width: 100%; height: 100vh; position: absolute; top: 0; left: 0; flex-direction: column; justify-content: center; align-items: center; text-align: center; padding: 20px; z-index: 10; opacity: 0; transition: opacity 0.8s ease-in-out; pointer-events: none; }
+    .page.active { display: flex; opacity: 1; pointer-events: auto; }
+    
+    .btn { background: linear-gradient(135deg, #ff416c, #ff4b2b); color: white; border: none; padding: 12px 35px; border-radius: 50px; font-size: 1.2rem; font-weight: bold; cursor: pointer; box-shadow: 0 5px 15px rgba(255, 65, 108, 0.4); transition: transform 0.2s, box-shadow 0.2s; margin-top: 20px; position: relative; z-index: 100; }
+    .btn:hover { transform: scale(1.05); box-shadow: 0 8px 25px rgba(255, 65, 108, 0.6); }
 
+    /* زر "لا تضغط هني" المميز */
+    .btn-warning-box { background: linear-gradient(135deg, #434343, #000000); color: #ffeb3b; border: 2px dashed #ffeb3b; padding: 10px 25px; border-radius: 50px; font-size: 1.1rem; font-weight: bold; cursor: pointer; box-shadow: 0 5px 15px rgba(0,0,0,0.5); transition: transform 0.2s; margin-top: 15px; z-index: 100; }
+    .btn-warning-box:hover { transform: scale(1.05); }
+
+    /* رسالة التحذير المنبثقة */
+    .warning-msg { display: none; margin-top: 15px; font-size: 1.3rem; font-weight: bold; color: #ff416c; background: rgba(255, 65, 108, 0.1); padding: 8px 20px; border-radius: 12px; border: 1px solid rgba(255, 65, 108, 0.3); animation: shake 0.4s ease-in-out; }
+
+    /* --- PAGE 0: Timer --- */
+    #page0 { background: radial-gradient(circle, #25122e 0%, #0a0612 100%); }
+    .subtitle-timer { font-size: 0.95rem; color: #d8b4e2; letter-spacing: 2px; margin-bottom: 5px; text-transform: uppercase; }
+    .main-title-timer { font-family: 'Great Vibes', cursive; font-size: 3.8rem; color: #fff; text-shadow: 0 0 15px rgba(255, 255, 255, 0.4); margin-bottom: 10px; }
+    .subtext-timer { font-size: 1.1rem; color: #e0c3fc; margin-bottom: 25px; }
+
+    .timer-boxes { display: flex; gap: 12px; justify-content: center; align-items: center; margin-bottom: 20px; }
+    .timer-box { background: rgba(255, 255, 255, 0.06); backdrop-filter: blur(8px); border: 1px solid rgba(255, 255, 255, 0.12); padding: 15px 18px; border-radius: 16px; min-width: 70px; box-shadow: 0 8px 20px rgba(0,0,0,0.3); }
+    .timer-num { font-size: 2.2rem; font-weight: 800; color: #fff; line-height: 1; }
+    .timer-label { font-size: 0.75rem; color: #b39ddb; margin-top: 5px; text-transform: uppercase; letter-spacing: 1px; }
+
+    /* --- PAGE 1: Realistic Cake & Continuous Confetti --- */
+    #page1 { background: radial-gradient(circle, #2c1654 0%, #0f0c1b 100%); position: relative; }
+    .hbd-title { font-family: 'Great Vibes', cursive; font-size: 4.5rem; color: #ffd700; text-shadow: 0 0 20px rgba(255, 215, 0, 0.6); margin-bottom: 20px; animation: pulse 2s infinite alternate; }
+
+    .cake-container { position: relative; width: 220px; height: 200px; margin: 20px auto; cursor: pointer; animation: floatCake 4s ease-in-out infinite; transition: transform 0.3s ease; z-index: 20; }
+    .cake-container:hover { transform: scale(1.08) rotate(2deg); }
+
+    .plate { position: absolute; bottom: 0; left: 50%; transform: translateX(-50%); width: 240px; height: 20px; background: linear-gradient(135deg, #e0e0e0, #ffffff, #999999); border-radius: 50%; box-shadow: 0 10px 25px rgba(0,0,0,0.6); }
+    .tier-bottom { position: absolute; bottom: 12px; left: 50%; transform: translateX(-50%); width: 180px; height: 80px; background: linear-gradient(to right, #e91e63, #ff80ab, #c2185b); border-radius: 15px 15px 5px 5px; box-shadow: inset 0 -10px 0 rgba(0,0,0,0.15), 0 5px 15px rgba(0,0,0,0.3); }
+    .tier-bottom::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 25px; background: #fff; border-radius: 15px 15px 50% 50%; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+    .tier-top { position: absolute; bottom: 85px; left: 50%; transform: translateX(-50%); width: 130px; height: 65px; background: linear-gradient(to right, #f48fb1, #f8bbd0, #f06292); border-radius: 15px 15px 5px 5px; box-shadow: inset 0 -8px 0 rgba(0,0,0,0.15), 0 5px 10px rgba(0,0,0,0.2); }
+    .tier-top::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 20px; background: #ffffff; border-radius: 15px 15px 50% 50%; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+    .cream-drip { position: absolute; top: 15px; width: 100%; display: flex; justify-content: space-around; }
+    .drip-dot { width: 12px; height: 15px; background: #fff; border-radius: 0 0 10px 10px; }
+
+    .candle { position: absolute; bottom: 145px; left: 50%; transform: translateX(-50%); width: 14px; height: 45px; background: repeating-linear-gradient(45deg, #ffd700, #ffd700 8px, #ffffff 8px, #ffffff 16px); border-radius: 4px; box-shadow: 0 0 5px rgba(0,0,0,0.3); }
+    .candle-wick { position: absolute; top: -8px; left: 50%; transform: translateX(-50%); width: 3px; height: 8px; background: #333; }
+    .realistic-flame { position: absolute; top: -30px; left: 50%; transform: translateX(-50%); width: 18px; height: 28px; background: radial-gradient(ellipse at bottom, #ffffff 0%, #ffeb3b 35%, #ff9800 70%, rgba(255,87,34,0) 100%); border-radius: 50% 50% 20% 20%; animation: realisticFlicker 0.1s infinite alternate; box-shadow: 0 0 20px #ff9800, 0 0 40px #ff5722; }
+    
+    /* --- PAGE 2: Album & Heart Mosaic & Easy Archery --- */
+    #page2 { background: linear-gradient(to bottom, #1a002c, #4a0040); overflow: hidden; position: relative; }
+    .petal { position: absolute; background: #ffb7c5; border-radius: 15px 0 15px 0; opacity: 0.7; pointer-events: none; animation: fall linear infinite; }
+    .tree-bg { position: absolute; bottom: 0; width: 100%; height: 300px; background: url('https://png.pngtree.com/png-clipart/20230303/ourmid/pngtree-sakura-flower-cherry-blossom-tree-branch-png-image_6628882.png') no-repeat center bottom / contain; opacity: 0.25; pointer-events: none; }
+    
+    .album-container { perspective: 1000px; width: 280px; height: 360px; position: relative; margin-top: 10px; }
+    .album-card { width: 100%; height: 100%; position: absolute; background: rgba(255,255,255,0.1); backdrop-filter: blur(10px); border: 2px solid rgba(255,255,255,0.2); border-radius: 20px; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 15px; transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+    .album-card img { width: 100%; height: 200px; object-fit: cover; border-radius: 12px; margin-bottom: 15px; }
+    .album-card p { font-size: 1.1rem; color: #ffe6f0; font-weight: 600; }
+    
+    /* Heart-Shaped Photo Mosaic */
+    .heart-mosaic { display: none; position: absolute; top: 12%; left: 50%; transform: translateX(-50%); width: 280px; height: 260px; z-index: 15; animation: heartBeat 1.2s infinite ease-in-out; }
+    .heart-photo { position: absolute; width: 75px; height: 75px; object-fit: cover; clip-path: path('M37.5,65 C37.5,65 75,40 75,22.5 C75,10 62.5,0 50,0 C37.5,0 37.5,15 37.5,15 C37.5,15 37.5,0 25,0 C12.5,0 0,10 0,22.5 C0,40 37.5,65 37.5,65 Z'); border: 3px solid #ff416c; box-shadow: 0 0 20px rgba(255,65,108,0.8); background: #fff; }
+
+    /* Easy Swinging Archery Game */
+    .archery-game { display: none; position: absolute; bottom: 25px; left: 50%; transform: translateX(-50%); width: 320px; height: 180px; z-index: 20; }
+    .swinging-bow-container { position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); animation: swingBow 2.5s ease-in-out infinite alternate; cursor: pointer; }
+    .bow { width: 100px; height: 35px; border: 4px solid #ffd700; border-radius: 50% 50% 0 0 / 100% 100% 0 0; border-bottom: none; }
+    .arrow-drag { position: absolute; bottom: 5px; left: 50%; transform: translateX(-50%); width: 6px; height: 80px; background: linear-gradient(to top, #ff416c, #ffd700); border-radius: 3px; }
+    .arrow-drag::before { content: ''; position: absolute; top: -10px; left: -5px; border-left: 8px solid transparent; border-right: 8px solid transparent; border-bottom: 15px solid #ffd700; }
+    .shoot-msg { position: absolute; bottom: -35px; width: 100%; font-weight: bold; color: #ffd700; font-size: 0.9rem; }
+
+    /* --- PAGE 3: Passcode Input --- */
+    #page3 { background: radial-gradient(circle, #3d002e 0%, #11001c 100%); }
+    .msg-box { background: rgba(255, 255, 255, 0.07); padding: 35px 25px; border-radius: 25px; border: 1px solid rgba(255,255,255,0.15); max-width: 500px; width: 90%; backdrop-filter: blur(12px); box-shadow: 0 15px 35px rgba(0,0,0,0.5); }
+    .msg-box h2 { color: #ff416c; margin-bottom: 15px; font-size: 1.8rem; }
+    .msg-box p { line-height: 1.9; font-size: 1.15rem; color: #f3e5f5; margin-bottom: 20px; }
+    .pass-input { width: 85%; padding: 14px; border-radius: 30px; border: 2px solid #ff416c; background: rgba(0,0,0,0.6); color: #fff; text-align: center; font-size: 1.25rem; outline: none; letter-spacing: 2px; box-shadow: inset 0 2px 5px rgba(0,0,0,0.5); }
+
+    /* --- PAGE 4: Dedicated Extra Message Page --- */
+    #page4 { background: radial-gradient(circle, #2b0b38 0%, #0d0214 100%); }
+    .card-letter { background: rgba(255, 255, 255, 0.08); padding: 40px 30px; border-radius: 25px; border: 1px solid rgba(255,215,0,0.3); max-width: 550px; width: 90%; backdrop-filter: blur(15px); box-shadow: 0 20px 40px rgba(0,0,0,0.6); position: relative; }
+    .card-letter h2 { color: #ffd700; font-size: 2rem; margin-bottom: 20px; }
+    .card-letter p { line-height: 2; font-size: 1.2rem; color: #f8bbd0; margin-bottom: 20px; text-align: justify; }
+
+    /* --- ERROR PAGE --- */
+    #pageError { background: #2a0008; }
+    .error-icon { font-size: 4rem; color: #ff2e63; margin-bottom: 15px; }
+
+    /* --- PAGE 5: Video --- */
+    #page5 { background: #000; }
+    .video-container { width: 90%; max-width: 700px; height: 400px; border-radius: 20px; overflow: hidden; box-shadow: 0 0 30px rgba(255, 65, 108, 0.5); }
+    iframe { width: 100%; height: 100%; border: none; }
+
+    @keyframes realisticFlicker { 0% { transform: translateX(-50%) scale(0.95) rotate(-1deg); opacity: 0.9; } 100% { transform: translateX(-50%) scale(1.08) rotate(1deg); opacity: 1; } }
+    @keyframes floatCake { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-12px); } }
+    @keyframes heartBeat { 0%, 100% { transform: translateX(-50%) scale(1); } 50% { transform: translateX(-50%) scale(1.08); } }
+    @keyframes swingBow { 0% { transform: translateX(-50%) rotate(-30deg); } 100% { transform: translateX(-50%) rotate(30deg); } }
+    @keyframes pulse { 0% { transform: scale(1); } 100% { transform: scale(1.08); } }
+    @keyframes fall { 0% { transform: translateY(-10vh) rotate(0deg); opacity: 1; } 100% { transform: translateY(105vh) rotate(360deg); opacity: 0; } }
+    @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-8px); } 75% { transform: translateX(8px); } }
+  </style>
+</head>
+<body>
+
+  <!-- PAGE 0: Countdown Timer -->
+  <div class="page active" id="page0">
+    <div class="subtitle-timer">✦ جاهزه؟ ✦</div>
+    <h1 class="main-title-timer">Her Special Day<br>Today</h1>
+    <p class="subtext-timer">شيء جميل بانتظاركِ ✨</p>
+
+    <div class="timer-boxes">
+      <div class="timer-box"><div class="timer-num">00</div><div class="timer-label">2010/11/2</div></div>
+      <div class="timer-box"><div class="timer-num">00</div><div class="timer-label">Hour</div></div>
+      <div class="timer-box"><div class="timer-num">00</div><div class="timer-label">Minutes</div></div>
+      <div class="timer-box"><div class="timer-num" id="secondsTimer">05</div><div class="timer-label">Seconds</div></div>
+    </div>
+
+    <!-- زر بدء الاحتفال (لا يتفعل إلا بعد انتهاء العد) -->
+    <button class="btn" id="startBtn" onclick="nextPage(1)" style="opacity: 0.5; pointer-events: none;">🔒 انتظري العداد...</button>
+    
+    <!-- زر "لا تضغط هني" الجديد -->
+    <button class="btn-warning-box" onclick="triggerWarning()">⚠️ لا تضغطي أهني</button>
+    
+    <!-- الرسالة المنبثقة عند ضغطه -->
+    <div class="warning-msg" id="warningMsg">شقلت أنا؟! عنيدههه🤨</div>
+  </div>
+
+  <!-- PAGE 1: Cake & Continuous Confetti -->
+  <div class="page" id="page1">
+    <h1 class="hbd-title">Happy Birthday! ✨</h1>
+    
+    <div class="cake-container" onclick="triggerExtraBurst()">
+      <div class="plate"></div>
+      <div class="tier-bottom">
+        <div class="cream-drip">
+          <div class="drip-dot"></div><div class="drip-dot"></div><div class="drip-dot"></div><div class="drip-dot"></div>
+        </div>
+      </div>
+      <div class="tier-top">
+        <div class="cream-drip">
+          <div class="drip-dot"></div><div class="drip-dot"></div><div class="drip-dot"></div>
+        </div>
+      </div>
+      <div class="candle">
+        <div class="candle-wick"></div>
+        <div class="realistic-flame"></div>
+      </div>
+    </div>
+
+    <p style="font-size: 1.3rem; color: #ddd; margin-top: 15px;">كل عام وأنتِ بخير وصحة وسلامة عسى ايامش كلها سعادة وياي 🎈</p>
+    <button class="btn" onclick="nextPage(2)">جاهزة نبتدي الاحتفال؟</button>
+  </div>
+
+  <!-- PAGE 2: Album & Heart Mosaic & Easy Archery -->
+  <div class="page" id="page2">
+    <div class="tree-bg"></div>
+
+    <h2 id="albumTitle" style="margin-bottom: 15px; color: #ffb7c5;">ألبوم الذكريات 🌸</h2>
+    
+    <div class="album-container" id="album">
+      <div class="album-card" style="z-index:5;"><img src="https://media.discordapp.net/attachments/814863571304448050/1566192149647593654/WhatsApp_Image_2026-10-31_at_11.46.37_PM.jpeg?ex=6ae7a59a&is=6ae6541a&hm=4b756e16636b30de146b28745681d7bf34d5757599eff3980ed0d5e78dace7ce&=&format=webp&width=577&height=1024"><p>ذكرى جميلة تجمعنا 💖</p></div>
+      <div class="album-card" style="z-index:4;"><img src="https://media.discordapp.net/attachments/814863571304448050/1566192150041862175/WhatsApp_Image_2026-10-31_at_11.46.37_PMl.jpeg?ex=6ae7a59b&is=6ae6541b&hm=700baeb3f545ae02bf273db4a55a4f2c08cbb508aee4e2ea209429a422446d7d&=&format=webp&width=577&height=1024"><p>ضحكات لا تُنسى 🌟</p></div>
+      <div class="album-card" style="z-index:3;"><img src="https://media.discordapp.net/attachments/814863571304448050/1566192150448967900/WhatsApp_Image_2026-10-31_at_11.46.37_PMo.jpeg?ex=6ae7a59b&is=6ae6541b&hm=70c38561236223eaf3cdd6e5ac656d5a6e58adbdac737f665ce49a164268157a&=&format=webp&width=1280&height=960"><p>لحظات مميزة جداً ✨</p></div>
+      <div class="album-card" style="z-index:2;"><img src="https://media.discordapp.net/attachments/814863571304448050/1566192151191097384/WhatsApp_Image_2026-10-31_at_11.46.37_PMp.jpeg?ex=6ae7a59b&is=6ae6541b&hm=b276c65ae51b9a52a0e72caf364c9e63a858f46b0439e391a1194b8ec6970c9f&=&format=webp&width=577&height=1024"><p>أجمل الأوقات 🎁</p></div>
+      <div class="album-card" style="z-index:1;"><img src="https://media.discordapp.net/attachments/814863571304448050/1566192151782621244/Screenshot_2026-10-31_234755.png?ex=6ae7a59b&is=6ae6541b&hm=de3a3574010b7548aab0e1bfb11be25ed533d89340510083a960d3c34bda584b&=&format=webp&quality=lossless"><p>كل عام وأنتِ الأجمل 💕</p></div>
+    </div>
+
+    <div class="heart-mosaic" id="heartMosaic">
+      <img src="https://media.discordapp.net/attachments/814863571304448050/1566192150041862175/WhatsApp_Image_2026-10-31_at_11.46.37_PMl.jpeg?ex=6ae7a59b&is=6ae6541b&hm=700baeb3f545ae02bf273db4a55a4f2c08cbb508aee4e2ea209429a422446d7d&=&format=webp&width=577&height=1024" class="heart-photo" style="top: 0px; left: 102px;">
+      <img src="https://media.discordapp.net/attachments/814863571304448050/1566192150448967900/WhatsApp_Image_2026-10-31_at_11.46.37_PMo.jpeg?ex=6ae7a59b&is=6ae6541b&hm=70c38561236223eaf3cdd6e5ac656d5a6e58adbdac737f665ce49a164268157a&=&format=webp&width=1280&height=960" class="heart-photo" style="top: 15px; left: 42px;">
+      <img src="https://media.discordapp.net/attachments/814863571304448050/1566192151191097384/WhatsApp_Image_2026-10-31_at_11.46.37_PMp.jpeg?ex=6ae7a59b&is=6ae6541b&hm=b276c65ae51b9a52a0e72caf364c9e63a858f46b0439e391a1194b8ec6970c9f&=&format=webp&width=577&height=1024" class="heart-photo" style="top: 15px; left: 162px;">
+      <img src="https://media.discordapp.net/attachments/814863571304448050/1566192149647593654/WhatsApp_Image_2026-10-31_at_11.46.37_PM.jpeg?ex=6ae7a59a&is=6ae6541a&hm=4b756e16636b30de146b28745681d7bf34d5757599eff3980ed0d5e78dace7ce&=&format=webp&width=577&height=1024" class="heart-photo" style="top: 75px; left: 10px;">
+      <img src="https://media.discordapp.net/attachments/814863571304448050/1566192150041862175/WhatsApp_Image_2026-10-31_at_11.46.37_PMl.jpeg?ex=6ae7a59b&is=6ae6541b&hm=700baeb3f545ae02bf273db4a55a4f2c08cbb508aee4e2ea209429a422446d7d&=&format=webp&width=577&height=1024" class="heart-photo" style="top: 75px; left: 195px;">
+      <img src="https://media.discordapp.net/attachments/814863571304448050/1566192150448967900/WhatsApp_Image_2026-10-31_at_11.46.37_PMo.jpeg?ex=6ae7a59b&is=6ae6541b&hm=70c38561236223eaf3cdd6e5ac656d5a6e58adbdac737f665ce49a164268157a&=&format=webp&width=1280&height=960" class="heart-photo" style="top: 135px; left: 45px;">
+      <img src="https://media.discordapp.net/attachments/814863571304448050/1566192151191097384/WhatsApp_Image_2026-10-31_at_11.46.37_PMp.jpeg?ex=6ae7a59b&is=6ae6541b&hm=b276c65ae51b9a52a0e72caf364c9e63a858f46b0439e391a1194b8ec6970c9f&=&format=webp&width=577&height=1024" class="heart-photo" style="top: 135px; left: 160px;">
+      <img src="https://media.discordapp.net/attachments/814863571304448050/1566192151782621244/Screenshot_2026-10-31_234755.png?ex=6ae7a59b&is=6ae6541b&hm=de3a3574010b7548aab0e1bfb11be25ed533d89340510083a960d3c34bda584b&=&format=webp&quality=lossless" class="heart-photo" style="top: 190px; left: 102px;">
+    </div>
+
+    <button class="btn" id="nextCardBtn" onclick="rotateCard()" style="margin-top: 20px;">الصورة التالية 🔄</button>
+
+    <div class="archery-game" id="archeryGame">
+      <div class="swinging-bow-container" onclick="shootEasyArrow()">
+        <div class="bow"></div>
+        <div class="arrow-drag" id="arrowDrag"></div>
+      </div>
+      <div class="shoot-msg">اضغطي اهني لإطلاق السهم نحو القلب بسهولة! 🏹❤️</div>
+    </div>
+  </div>
+
+  <!-- PAGE 3: Passcode Input -->
+  <div class="page" id="page3">
+    <div class="msg-box">
+      <h2>أدخلي الرقم السري 🔑</h2>
+      <p>حق نواصل لازم تعرفين الباسورد | تلميح شسميش انا؟:</p>
+      <input type="password" id="passcode" class="pass-input" placeholder="أدخلي الرقم السري">
+      <br>
+      <button class="btn" onclick="checkPassword()">فتح المفاجأة 🎁</button>
+    </div>
+  </div>
+
+  <!-- PAGE 4: Dedicated Extra Message Page -->
+  <div class="page" id="page4">
+    <div class="card-letter">
+      <h2>إلى أغلى إنسانة 💌</h2>
+      <p>
+       ميمووو شلونش؟ فتاة الميلاد اتمنى تكونين بخير وانتي تقرين رسالة معرف اعبر ترا بس
+        كل عام وانتي بالف خير وصحة وسلامة صرتي 16 خلاص صرتي عودة , واتمنى لش سنة سعيدة تحققين فيها احلامش واهدافش وتكوني اقرب الى الله عز وجل واهل البيت عليهم السلام ويقرب منش بنات الحلال ويبعد عندش اولاد وبنات الحرام والي مو زينين اتمنى سنة نحسن فيها علاقتنا وتكون بدون مشاكل وما نكرر اخطائنا حق تستمر علاقة, نصايح بسيطة اتمنى تركزين على روحش ودراستش  وتكون قدوتش سيدة نساء العالمين فاطمة الزهراء عليها افضل السلام🌸✨
+      </p>
+      <button class="btn" onclick="nextPage(5)">استمعي للأغنية 🎵</button>
+    </div>
+  </div>
+
+  <!-- ERROR PAGE -->
+  <div class="page" id="pageError">
+    <div class="error-icon">❌</div>
+    <h2 style="color: #ff2e63; margin-bottom: 10px;">كلمة السر خاطئة!</h2>
+    <p style="color: #ccc; margin-bottom: 20px;">اح؟ غلطتي! تعورت نفس سهم من شوي):</p>
+    <button class="btn" onclick="nextPage(3)">العودة للمحاولة مرة أخرى 🔄</button>
+  </div>
+
+  <!-- PAGE 5: Video -->
+  <div class="page" id="page5">
+    <h2 style="color: #ffd700; margin-bottom: 20px;">أغنية عيد الميلاد 🎵🎉</h2>
+    <div class="video-container">
+      <iframe src="https://www.youtube.com/embed/watch?v=sJX6f8JaLXg" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+    </div>
+    <button class="btn" onclick="nextPage(1)" style="margin-top: 20px;">إعادة العرض من البداية 🔄</button>
+  </div>
+
+  <script>
+    // 5-Seconds Timer Logic for Page 0
+    let timeLeft = 5;
+    const timerElem = document.getElementById('secondsTimer');
+    const startBtn = document.getElementById('startBtn');
+    let countdown;
+
+    function startTimer() {
+      timeLeft = 16;
+      timerElem.textContent = '16';
+      startBtn.style.opacity = '0.5';
+      startBtn.style.pointerEvents = 'none';
+      startBtn.textContent = '🔒 انتظري العداد...';
+      document.getElementById('warningMsg').style.display = 'none';
+
+      countdown = setInterval(() => {
+        timeLeft--;
+        timerElem.textContent = timeLeft < 10 ? '0' + timeLeft : timeLeft;
+        if (timeLeft <= 0) {
+          clearInterval(countdown);
+          startBtn.style.opacity = '1';
+          startBtn.style.pointerEvents = 'auto';
+          startBtn.textContent = 'اضغطي هنا لبدء الاحتفال ✨';
+        }
+      }, 1000);
+    }
+
+    startTimer();
+
+    // وظيفة زر "لا تضغط هني" لإعادة الصفحة وإظهار الرسالة
+    function triggerWarning() {
+      clearInterval(countdown);
+      const msg = document.getElementById('warningMsg');
+      msg.style.display = 'block';
+      setTimeout(() => {
+        startTimer();
+      }, 1200);
+    }
+
+    // Continuous Confetti for Page 1
+    let confettiInterval;
+    function startContinuousConfetti() {
+      if (!confettiInterval) {
+        confettiInterval = setInterval(() => {
+          if (document.getElementById('page1').classList.contains('active')) {
+            confetti({
+              particleCount: 25, startVelocity: 30, spread: 360, ticks: 80,
+              origin: { x: Math.random(), y: Math.random() * 0.6 }
+            });
+          }
+        }, 800);
+      }
+    }
+
+    function stopContinuousConfetti() {
+      if (confettiInterval) {
+        clearInterval(confettiInterval);
+        confettiInterval = null;
+      }
+    }
+
+    function triggerExtraBurst() {
+      confetti({ particleCount: 100, spread: 120, origin: { y: 0.6 } });
+    }
+
+    // Petals Generator for Page 2
+    for(let i=0; i<25; i++) {
+      let petal = document.createElement('div');
+      petal.className = 'petal';
+      petal.style.left = Math.random() * 100 + 'vw';
+      petal.style.width = Math.random() * 12 + 8 + 'px';
+      petal.style.height = petal.style.width;
+      petal.style.animationDuration = Math.random() * 5 + 4 + 's';
+      petal.style.animationDelay = Math.random() * 5 + 's';
+      document.getElementById('page2').appendChild(petal);
+    }
+
+    function nextPage(pageNum) {
+      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+      const target = pageNum === 'error' ? document.getElementById('pageError') : document.getElementById('page' + pageNum);
+      target.classList.add('active');
+
+      if (pageNum === 1) {
+        startContinuousConfetti();
+      } else {
+        stopContinuousConfetti();
+      }
+    }
+
+    // Album & Easy Archery Logic
+    let currentCardIndex = 0;
+    const cards = document.querySelectorAll('.album-card');
+    
+    function rotateCard() {
+      if (currentCardIndex < cards.length) {
+        cards[currentCardIndex].style.transform = `translateY(-120%) rotate(${Math.random() * 40 - 20}deg)`;
+        cards[currentCardIndex].style.opacity = '0';
+        currentCardIndex++;
+      }
+      
+      if (currentCardIndex === cards.length) {
+        document.getElementById('nextCardBtn').style.display = 'none';
+        document.getElementById('album').style.display = 'none';
+        document.getElementById('albumTitle').textContent = 'صوّبي السهم نحو قلب الصور! 🏹❤️';
+        setTimeout(showHeartMosaic, 400);
+      }
+    }
+
+    function showHeartMosaic() {
+      document.getElementById('heartMosaic').style.display = 'block';
+      document.getElementById('archeryGame').style.display = 'block';
+    }
+
+    function shootEasyArrow() {
+      const arrow = document.getElementById('arrowDrag');
+      arrow.style.transition = 'transform 0.4s ease-out';
+      arrow.style.transform = `translateX(-50%) translateY(-350px) scale(0.5)`;
+
+      setTimeout(() => {
+        confetti({ particleCount: 140, spread: 90, origin: { y: 0.3 } });
+        setTimeout(() => nextPage(3), 800);
+      }, 350);
+    }
+
+    // Password Validation
+    const SECRET_CODE = "ميمو";
+
+    function checkPassword() {
+      const input = document.getElementById('passcode').value;
+      if (input === SECRET_CODE) {
+        confetti({ particleCount: 150, spread: 100 });
+        nextPage(4);
+      } else {
+        nextPage('error');
+      }
+    }
+  </script>
+</body>
+</html>
